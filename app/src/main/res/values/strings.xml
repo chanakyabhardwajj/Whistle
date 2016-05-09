@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Whistle</string>
-    <string name="game_start_button_message">start</string>
+    <string name="game_start_button_message">play</string>
     <string name="game_title">Whistle</string>
     <string name="game_instructions">Aim with a finger. Whistle to shoot.</string>
+    <string name="new_game_button_message">New\nGame</string>
 </resources>

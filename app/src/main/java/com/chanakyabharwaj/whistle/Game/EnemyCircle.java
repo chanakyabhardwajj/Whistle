@@ -1,39 +1,52 @@
 package com.chanakyabharwaj.whistle.Game;
 
-
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.chanakyabharwaj.whistle.R;
+
+
+class EnemyCircleState {
+    public float x;
+    public float y;
+    public float r;
+
+    public EnemyCircleState(float _x, float _y, float _r) {
+        x = _x;
+        y = _y;
+        r = _r;
+    }
+}
+
 public class EnemyCircle extends Circle {
-    public static int minRadius = 20;
-    public static long movementInterval = 1000;
-    private long lastMovedTime = 0;
-    public static int spawnInterval = 2000;
-    private static int moveDelta = 15;
-    public boolean killed = false;
-    public long killedAt;
-    public int timeToRemoval = 300;
+    //Defaults
+    static int minRadius = 20;
+    static long movementInterval = 1000;
+    static int spawnInterval = 2000;
+
+    boolean killed = false;
+    long killedAt;
+    int timeToRemoval = 300;
 
     public static void levelUpdatedTo(int gameLevel) {
         if (gameLevel == 0) {
             movementInterval = 1000;
             spawnInterval = 1000;
-            moveDelta = 15;
             minRadius = 20;
             return;
         }
         movementInterval = movementInterval > 300 ? movementInterval - (50 * gameLevel) : movementInterval;
         spawnInterval = spawnInterval > 300 ? spawnInterval - (50 * gameLevel) : spawnInterval;
-        moveDelta = moveDelta < 50 ? moveDelta + (2 * gameLevel) : moveDelta;
         minRadius = minRadius > 10 ? minRadius - gameLevel : minRadius;
     }
 
     private Paint helperCirclePaint;
 
-    public EnemyCircle(float x, float r) {
+    public EnemyCircle(float x, float y, float r) {
         pos.x = x;
-        pos.y = 10;
+        pos.y = y;
         radius = r;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL);
@@ -46,13 +59,12 @@ public class EnemyCircle extends Circle {
         helperCirclePaint.setAlpha(50);
     }
 
+    public EnemyCircleState getState() {
+        return new EnemyCircleState(pos.x, pos.y, radius);
+    }
+
     @Override
     public void draw(Canvas c) {
-        long now = System.currentTimeMillis();
-        if (now - lastMovedTime > movementInterval) {
-            pos.y += moveDelta;
-            lastMovedTime = now;
-        }
         c.drawCircle(pos.x, pos.y, radius * 2f, helperCirclePaint);
         c.drawCircle(pos.x, pos.y, radius, paint);
     }
@@ -63,7 +75,7 @@ public class EnemyCircle extends Circle {
         }
 
         paint.setAlpha(0);
-        helperCirclePaint.setColor(Color.parseColor("#ffcc01"));
+        helperCirclePaint.setColor(Color.parseColor("#E71D36"));
         helperCirclePaint.setAlpha(80);
         killed = true;
         killedAt = System.currentTimeMillis();

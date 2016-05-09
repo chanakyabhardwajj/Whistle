@@ -1,26 +1,38 @@
 package com.chanakyabharwaj.whistle.Game;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
+import com.chanakyabharwaj.whistle.R;
+
+class WhistleStickState {
+    float length;
+    double angle;
+
+    public WhistleStickState(float _length, double _angle) {
+        length = _length;
+        angle = _angle;
+    }
+}
+
 public class WhistleStick extends Shape {
-    public float dampFactor = 0.95f;
     public boolean configured = false;
-    public float minLength = 100;
-    public float length = 100;
 
-    public PointF end = new PointF();
+    private int minPitch = 600;
+    private float dampFactor = 0.95f;
+    private float minLength = 100;
+    private float length = 100;
+    public double angle = Math.PI / 2;
+    private PointF end = new PointF();
 
-    private Paint helperStickPaint;
     private int helperStickLength = 1000;
     private PointF helperStickEnd = new PointF();
-
+    private Paint helperStickPaint;
     private Paint helperCirclePaint;
-
-    public double angle = Math.PI / 2;
 
     public void configure(Canvas c) {
         if (configured) {
@@ -28,11 +40,12 @@ public class WhistleStick extends Shape {
         }
 
         pos.x = c.getWidth() / 2;
-        pos.y = c.getHeight() - 100;
+        pos.y = c.getHeight() / 2;
 
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setColor(Color.parseColor("#02C39A"));
+
         paint.setShadowLayer(4.0f, 0.0f, 2.0f, 0xFF000000);
         paint.setStrokeWidth(6);
 
@@ -47,6 +60,15 @@ public class WhistleStick extends Shape {
         helperCirclePaint.setColor(Color.parseColor("#02C39A"));
         helperCirclePaint.setAlpha(50);
         configured = true;
+    }
+
+    public WhistleStickState getState() {
+        return new WhistleStickState(length, angle);
+    }
+
+    public void setState(WhistleStickState state) {
+        length = state.length;
+        angle = state.angle;
     }
 
     @Override
@@ -67,7 +89,7 @@ public class WhistleStick extends Shape {
     }
 
     public void adaptToPitch(float pitch) {
-        if (pitch < 600) {
+        if (pitch < minPitch) {
             length = length <= minLength ? length : length * dampFactor;
         } else {
             length = (int) Math.floor(pitch / 4);
@@ -103,7 +125,7 @@ public class WhistleStick extends Shape {
         return distance(a, c) + distance(c, b) == distance(a, b);
     }
 
-    PointF closestPointOnLine(float lx1, float ly1, float lx2, float ly2, float x0, float y0) {
+    private PointF closestPointOnLine(float lx1, float ly1, float lx2, float ly2, float x0, float y0) {
         float A1 = ly2 - ly1;
         float B1 = lx1 - lx2;
         double C1 = (ly2 - ly1) * lx1 + (lx1 - lx2) * ly1;
