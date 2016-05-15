@@ -1,13 +1,10 @@
 package com.chanakyabharwaj.whistle.Game;
 
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.PointF;
-
-import com.chanakyabharwaj.whistle.R;
 
 class WhistleStickState {
     float length;
@@ -92,7 +89,7 @@ public class WhistleStick extends Shape {
         if (pitch < minPitch) {
             length = length <= minLength ? length : length * dampFactor;
         } else {
-            length = (int) Math.floor(pitch / 4);
+            length = (int) Math.floor(pitch / 3);
         }
     }
 

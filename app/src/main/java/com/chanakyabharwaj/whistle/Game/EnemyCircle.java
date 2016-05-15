@@ -1,11 +1,8 @@
 package com.chanakyabharwaj.whistle.Game;
 
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-
-import com.chanakyabharwaj.whistle.R;
 
 
 class EnemyCircleState {

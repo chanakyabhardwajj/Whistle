@@ -1,22 +1,16 @@
 package com.chanakyabharwaj.whistle.Game;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.chanakyabharwaj.whistle.GameActivity;
 import com.chanakyabharwaj.whistle.R;
 
 import java.util.ArrayList;
@@ -45,12 +39,17 @@ public class GameView extends SurfaceView implements Runnable {
     public int lastHighScore;
 
     //Dimensions for game
-    private float screenWidth;
-    private float screenHeight;
-    private volatile float pitch;
-    private double lastX = 0;
+    private float canvasWidth = 0;
+    private float canvasHeight = 0;
+    private float canvasMinX;
+    private float canvasMinY;
+    private float canvasMaxX;
+    private float canvasMaxY;
     private int topMargin = 40;
     private int leftMargin = 40;
+
+    private volatile float pitch;
+    private double lastX = 0;
 
     //Game rendering
     private volatile boolean running = false;
@@ -72,13 +71,6 @@ public class GameView extends SurfaceView implements Runnable {
         stick = new WhistleStick();
         enemies = new ArrayList<>();
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(metrics);
-
-        screenWidth = metrics.widthPixels;
-        screenHeight = metrics.heightPixels;
     }
 
     public GameState getGameState() {
@@ -117,16 +109,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         EnemyCircle.levelUpdatedTo(gameLevel);
         if (state == null) {
-            int numOfEnemies = 2 * (1 + gameLevel);
-            synchronized (enemies) {
-                enemies.clear();
-                for (int i = 0; i < numOfEnemies; i++) {
-                    float x = (float) (screenWidth * Math.random());
-                    float y = (float) (screenHeight * Math.random());
-                    float r = (float) (EnemyCircle.minRadius * (1 + Math.random()));
-                    enemies.add(new EnemyCircle(x, y, r));
-                }
-            }
+            addRandomEnemies(gameLevel);
         } else {
             synchronized (enemies) {
                 enemies.clear();
@@ -142,20 +125,24 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void startLevel(int level) {
-        int numOfEnemies = 2 * (1 + level);
         EnemyCircle.levelUpdatedTo(level);
+        addRandomEnemies(level);
+
+        levelDuration = 1000 * (gameLevel < 10 ? 20 - gameLevel : 10);
+        levelRunningFor = 0;
+    }
+
+    private void addRandomEnemies(int level) {
+        int numOfEnemies = 2 * (1 + level);
         synchronized (enemies) {
             enemies.clear();
             for (int i = 0; i < numOfEnemies; i++) {
-                float x = (float) (screenWidth * Math.random());
-                float y = (float) (screenHeight * Math.random());
+                float x = canvasMinX + (int) (Math.random() * ((canvasMaxX - canvasMinX) + 1));
+                float y = canvasMinY + (int) (Math.random() * ((canvasMaxY - canvasMinY) + 1));
                 float r = (float) (EnemyCircle.minRadius * (1 + Math.random()));
                 enemies.add(new EnemyCircle(x, y, r));
             }
         }
-
-        levelDuration = 1000 * (gameLevel < 10 ? 20 - gameLevel : 10);
-        levelRunningFor = 0;
     }
 
     private void startGamePipeLine() {
@@ -228,6 +215,15 @@ public class GameView extends SurfaceView implements Runnable {
             Canvas canvas = holder.lockCanvas();
             canvas.drawColor(getResources().getColor(R.color.background));
 
+            if (canvasHeight == 0) {
+                canvasHeight = canvas.getHeight();
+                canvasWidth = canvas.getWidth();
+                canvasMinX = 0.2f * canvasWidth;
+                canvasMinY = 0.2f * canvasHeight;
+                canvasMaxX = 0.8f * canvasWidth;
+                canvasMaxY = 0.8f * canvasHeight;
+            }
+
             if (isGameOver) {
                 drawGameOverMessage(canvas);
             } else {
@@ -275,8 +271,6 @@ public class GameView extends SurfaceView implements Runnable {
                 }
             }
             holder.unlockCanvasAndPost(canvas);
-
-
         }
     }
 
@@ -294,11 +288,11 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void drawLevelTime(Canvas canvas) {
-        drawMultilineText("Time", Math.round((levelDuration - levelRunningFor) / 1000), (int) screenWidth / 2, topMargin, canvas);
+        drawMultilineText("Time", Math.round((levelDuration - levelRunningFor) / 1000), (int) canvasWidth / 2, topMargin, canvas);
     }
 
     private void drawScore(Canvas canvas) {
-        drawMultilineText("Score", gameScore, (int) screenWidth - leftMargin, topMargin, canvas);
+        drawMultilineText("Score", gameScore, (int) canvasWidth - leftMargin, topMargin, canvas);
     }
 
     private void drawLevel(Canvas canvas) {
@@ -332,7 +326,6 @@ public class GameView extends SurfaceView implements Runnable {
         canvas.drawText("Highest score - " + lastHighScore, xPos2, yPos2 + 40, scorePaint);
     }
 
-
     private void finishGame() {
         isGameOver = true;
         isGamePaused = false;
@@ -355,7 +348,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             case MotionEvent.ACTION_MOVE:
                 double xDelta = event.getX() - lastX;
-                double angleDelta = ((xDelta * Math.PI)) / (2 * screenWidth);
+                double angleDelta = ((xDelta * Math.PI)) / (2 * canvasWidth);
                 stick.angle -= angleDelta;
                 lastX = event.getX();
                 break;
@@ -367,4 +360,3 @@ public class GameView extends SurfaceView implements Runnable {
         return true;
     }
 }
-
