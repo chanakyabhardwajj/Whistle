@@ -30,7 +30,7 @@ public class GameActivity extends Activity {
         if (score > lastHighScore) {
             SharedPreferences.Editor prefsEditor = mPrefs.edit();
             prefsEditor.putInt(gameHighScoreKey, score);
-            prefsEditor.apply();
+            prefsEditor.commit();
         }
     }
 
@@ -58,6 +58,7 @@ public class GameActivity extends Activity {
             public void onClick(View v) {
                 whistleView.pause();
                 whistleView.resume(null);
+                showPauseButton();
             }
         });
 
@@ -99,7 +100,7 @@ public class GameActivity extends Activity {
             whistleView.resume(gamestate);
 
             //Remove the previously stored state
-            mPrefs.edit().remove(gameStateKey).apply();
+            mPrefs.edit().remove(gameStateKey).commit();
         }
         showPauseButton();
     }
@@ -119,7 +120,7 @@ public class GameActivity extends Activity {
             saveHighScore(state.gameScore);
         }
 
-        prefsEditor.apply();
+        prefsEditor.commit();
         whistleView.pause();
     }
 }

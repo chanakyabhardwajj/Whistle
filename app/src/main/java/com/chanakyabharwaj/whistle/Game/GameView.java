@@ -6,9 +6,11 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.chanakyabharwaj.whistle.R;
@@ -39,8 +41,8 @@ public class GameView extends SurfaceView implements Runnable {
     public int lastHighScore;
 
     //Dimensions for game
-    private float canvasWidth = 0;
-    private float canvasHeight = 0;
+    private float canvasWidth;
+    private float canvasHeight;
     private float canvasMinX;
     private float canvasMinY;
     private float canvasMaxX;
@@ -71,6 +73,19 @@ public class GameView extends SurfaceView implements Runnable {
         stick = new WhistleStick();
         enemies = new ArrayList<>();
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+        if (canvasWidth == 0) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            wm.getDefaultDisplay().getMetrics(metrics);
+
+            canvasWidth = metrics.widthPixels;
+            canvasHeight = metrics.heightPixels;
+            canvasMinX = 0.2f * canvasWidth;
+            canvasMinY = 0.2f * canvasHeight;
+            canvasMaxX = 0.8f * canvasWidth;
+            canvasMaxY = 0.8f * canvasHeight;
+        }
     }
 
     public GameState getGameState() {
@@ -104,6 +119,8 @@ public class GameView extends SurfaceView implements Runnable {
 
     public void restoreGameState(GameState state) {
         isGameOver = false;
+        isGamePaused = false;
+        pausedGameState = null;
         gameLevel = state == null ? 0 : state.gameLevel;
         gameScore = state == null ? 0 : state.gameScore;
 
@@ -175,6 +192,7 @@ public class GameView extends SurfaceView implements Runnable {
         if (isGamePaused) {
             resume(pausedGameState);
             isGamePaused = false;
+            pausedGameState = null;
             Toast.makeText(getContext(), "Play", Toast.LENGTH_SHORT).show();
         } else {
             pause();
@@ -204,6 +222,18 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        canvasHeight = h;
+        canvasWidth = w;
+        canvasMinX = 0.2f * canvasWidth;
+        canvasMinY = 0.2f * canvasHeight;
+        canvasMaxX = 0.8f * canvasWidth;
+        canvasMaxY = 0.8f * canvasHeight;
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
+
     @Override
     public void run() {
         while (running) {
@@ -214,15 +244,6 @@ public class GameView extends SurfaceView implements Runnable {
 
             Canvas canvas = holder.lockCanvas();
             canvas.drawColor(getResources().getColor(R.color.background));
-
-            if (canvasHeight == 0) {
-                canvasHeight = canvas.getHeight();
-                canvasWidth = canvas.getWidth();
-                canvasMinX = 0.2f * canvasWidth;
-                canvasMinY = 0.2f * canvasHeight;
-                canvasMaxX = 0.8f * canvasWidth;
-                canvasMaxY = 0.8f * canvasHeight;
-            }
 
             if (isGameOver) {
                 drawGameOverMessage(canvas);
