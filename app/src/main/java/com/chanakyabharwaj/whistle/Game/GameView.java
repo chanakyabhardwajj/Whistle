@@ -71,7 +71,7 @@ public class GameView extends SurfaceView implements Runnable {
         super(context, attrs);
         holder = getHolder();
         stick = new WhistleStick();
-        enemies = new ArrayList<>();
+        enemies = new ArrayList<EnemyCircle>();
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         if (canvasWidth == 0) {
@@ -93,7 +93,7 @@ public class GameView extends SurfaceView implements Runnable {
             return null;
         }
         GameState state = new GameState();
-        state.enemiesState = new ArrayList<>();
+        state.enemiesState = new ArrayList<EnemyCircleState>();
 
         for (EnemyCircle e : enemies) {
             state.enemiesState.add(e.getState());

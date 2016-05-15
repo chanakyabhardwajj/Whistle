@@ -1,27 +1,28 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 20
     buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.chanakyabharwaj.whistle"
         minSdkVersion 8
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 20
+        versionCode 3
+        versionName "3.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.google.code.gson:gson:2.5'
+    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile 'com.android.support:support-v4:20.0.0'
     compile files('libs/TarsosDSP-Android-2.0-bin.jar')
-
+    compile 'com.google.code.gson:gson:2.5'
 }
