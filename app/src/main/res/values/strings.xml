@@ -4,4 +4,5 @@
     <string name="game_title">Whistle</string>
     <string name="game_instructions">Aim with a finger. Whistle to shoot.</string>
     <string name="new_game_button_message">New\nGame</string>
+    <string name="permission_denied_msg">The app can not run without the permission to capture audio.</string>
 </resources>
