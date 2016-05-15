@@ -20,7 +20,7 @@ public class WhistleStick extends Shape {
     public boolean configured = false;
 
     private int minPitch = 600;
-    private float dampFactor = 0.95f;
+    private float dampFactor = 0.75f;
     private float minLength = 100;
     private float length = 100;
     public double angle = Math.PI / 2;
