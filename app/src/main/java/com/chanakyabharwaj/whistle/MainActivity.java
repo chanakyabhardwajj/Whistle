@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.view.Window;
@@ -39,6 +40,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void requestPermission() {
         final String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO};
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.RECORD_AUDIO)) {
+            ActivityCompat.requestPermissions(this, permissions, AUDIO_RECORD_PERM_CODE);
+            return;
+        }
         final Activity thisActivity = this;
 
         View.OnClickListener listener = new View.OnClickListener() {
@@ -48,6 +54,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         AUDIO_RECORD_PERM_CODE);
             }
         };
+
+        Snackbar.make(findViewById(android.R.id.content), R.string.permission_rationale,
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction("ok", listener)
+                .show();
     }
 
     @Override
